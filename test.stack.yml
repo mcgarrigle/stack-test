@@ -1,0 +1,42 @@
+version: '3.8'
+
+# docker stack deploy -c test.stack.yml test
+
+services:
+
+  admin:
+    image: "macthegif/diagnostic:latest"
+    command: ["/usr/bin/sleep", "infinity"]
+    secrets:
+      - "test.secret"
+    networks:
+      - "default"
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
+
+  server:
+    image: 'nginx'
+    secrets:
+      - "test.secret"
+    ports:
+      - "8080:80"
+    networks:
+      - "default"
+    deploy:
+      replicas: 3
+      placement:
+        max_replicas_per_node: 1
+
+volumes:
+  home:
+
+secrets:
+  test.secret:
+    file: ./secrets/test.secret
+
+networks:
+  default:
+    driver: overlay
+    attachable: true

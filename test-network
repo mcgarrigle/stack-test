@@ -1,0 +1,32 @@
+#!/usr/bin/bash
+
+NODE1=node1
+NODE2=node2
+NODE3=node3
+
+try() {
+  # nc -z -w 1 $1 $2 2> /dev/null
+  curl -s -m 1 $1:$2 > /dev/null
+  if [ $? == 0 ]; then
+    echo $1 ok
+  else
+    echo $1 fail
+  fi
+}
+
+docker service ps test_server -f 'desired-state=running'
+
+echo
+
+echo // all nodes in swarm
+try $NODE1 8080
+try $NODE2 8080
+try $NODE3 8080
+
+echo
+echo // single node
+try $NODE1 8080
+try $NODE1 8080
+try $NODE1 8080
+
+
